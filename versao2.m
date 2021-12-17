@@ -10,6 +10,7 @@ hold on
 plot (x,y)
 
 ang = [];
+
 while length(ang)~=3
 
 
@@ -26,14 +27,21 @@ plot (x,y)
 
 end
 
-cl_id = [0.2 , 0.4 , 0.7];
-a = 1;
+temp = cl;
 
-for i = 1:10
+cl_id = [0.2 , 0.4 , 0.7];
+%a = 2;
+
+for a = 4:4
+for i = 1:5
     
-i
+%i
+
 
 [ang,cl,cd] = analise(perfil,0);
+
+if a ~= length(ang)+1
+
 loss = (cl(a)-cl_id(a))^2;
 
 %mkdir (int2str(i))
@@ -44,7 +52,7 @@ for k = 1:length(as1)
     perfil_ = update(perfilb,as1_,as2_);
     [ang_, cl_, cd_] = analise(perfil_,k);
     
-    if length(ang_) ~= 0 && ang_(a) == ang(a)
+    if length(ang_) == a && ang_(a) == ang(a)
         loss_ = (cl_id(a) - cl_(a))^2;
         as1(k) = as1(k)*(loss<loss_)*0.8 + as1_(k)*(loss>loss_);
     end
@@ -58,11 +66,45 @@ for k = 1:length(as1)
     perfil_ = update(perfilb,as1_,as2_);
     [ang_, cl_, cd_] = analise(perfil_,k);
     
-    if length(ang_) ~= 0 && ang_(a) == ang(a)
+    if length(ang_) == a && ang_(a) == ang(a)
         loss_ = (cl_id(a) - cl_(a))^2;
         as2(k) = as2(k)*(loss<loss_)*0.8 + as2_(k)*(loss>loss_);
     end
     
+end
+
+else
+loss = mean(cd);
+
+%mkdir (int2str(i))
+for k = 1:length(as1)
+    as1_ = zeros(11,1);
+    as2_ = zeros(11,1);
+    as1_(k) = as1(k)*1.2;
+    perfil_ = update(perfilb,as1_,as2_);
+    [ang_, cl_, cd_] = analise(perfil_,k);
+    
+    if length(ang_) == a && ang_(a) == ang(a)
+        loss_ = mean(cd_);
+        as1(k) = as1(k)*(loss<loss_)*0.8 + as1_(k)*(loss>loss_);
+    end
+    
+end
+
+for k = 1:length(as1)
+    as1_ = zeros(11,1);
+    as2_ = zeros(11,1);
+    as2_(k) = as1(k)*1.2;
+    perfil_ = update(perfilb,as1_,as2_);
+    [ang_, cl_, cd_] = analise(perfil_,k);
+    
+    if length(ang_) == a && ang_(a) == ang(a)
+        loss_ = mean(cd_);
+        as2(k) = as2(k)*(loss<loss_)*0.8 + as2_(k)*(loss>loss_);
+    end
+    
+end
+
 end
 
 perfil = update(perfilb,as1,as2);
@@ -73,6 +115,10 @@ plot (x,y)
 %res=analise(perfil)
 [ang,cl,cd] = analise(perfil,0);
 
+
+
+
+end
 
 end
 
