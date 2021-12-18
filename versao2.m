@@ -4,9 +4,14 @@ x=perfilb(:,1);
 y=perfilb(:,2);
 extra = perfilb(1:fix(length(perfilb)/2),:);
 intra = perfilb(fix(length(perfilb)/2)+1:length(perfilb),:);
+
+fname = "resultados.txt";
+fid = fopen(fname,'w');
+
  
 figure()
 hold on
+axis([0 1 -0.15 0.15])
 plot (x,y)
 
 ang = [];
@@ -14,8 +19,8 @@ ang = [];
 while length(ang)~=3
 
 
-as1 = rand(11,1)/1000;  %%
-as2 = -rand(11,1)/1000; %% 
+as1 = rand(20,1)/1000;  %%
+as2 = -rand(20,1)/1000; %% 
 
 perfil = update(perfilb,as1,as2);
 x=perfil(:,1);
@@ -32,7 +37,7 @@ temp = cl;
 cl_id = [0.2 , 0.4 , 0.7];
 %a = 2;
 
-for a = 4:4
+for a = 1:4
 for i = 1:5
     
 %i
@@ -40,68 +45,82 @@ for i = 1:5
 
 [ang,cl,cd] = analise(perfil,0);
 
-if a ~= length(ang)+1
+for j = 1:length(ang)
+fprintf(fid,"%f %f %f \n", ang(j), cl(j), cd(j));
+end
+fprintf("\n\n")
 
-loss = (cl(a)-cl_id(a))^2;
+if a ~= 4
+
+%loss = (cl(a)-cl_id(a))^2;
 
 %mkdir (int2str(i))
 for k = 1:length(as1)
-    as1_ = zeros(11,1);
-    as2_ = zeros(11,1);
+    as1_ = zeros(length(as1),1);
+    as2_ = zeros(length(as2),1);
     as1_(k) = as1(k)*1.2;
     perfil_ = update(perfilb,as1_,as2_);
     [ang_, cl_, cd_] = analise(perfil_,k);
     
-    if length(ang_) == a && ang_(a) == ang(a)
+    if length(ang_) >= a && ang_(a) == ang(a)
         loss_ = (cl_id(a) - cl_(a))^2;
-        as1(k) = as1(k)*(loss<loss_)*0.8 + as1_(k)*(loss>loss_);
+        %as1(k) = as1(k)*(loss<loss_)*0.9 + as1_(k)*(loss>loss_);
+        deriv = 2 * (cl_id(a) - cl(a)) * (cl_(a)-cl(a));
+        as1(k) = as1(k) + deriv*0.1;
     end
     
 end
 
-for k = 1:length(as1)
-    as1_ = zeros(11,1);
-    as2_ = zeros(11,1);
-    as2_(k) = as1(k)*1.2;
+for k = 1:length(as2)
+    as1_ = zeros(length(as1),1);
+    as2_ = zeros(length(as2),1);
+    as2_(k) = as2(k)*1.2;
     perfil_ = update(perfilb,as1_,as2_);
     [ang_, cl_, cd_] = analise(perfil_,k);
     
-    if length(ang_) == a && ang_(a) == ang(a)
+    if length(ang_) >= a && ang_(a) == ang(a)
         loss_ = (cl_id(a) - cl_(a))^2;
-        as2(k) = as2(k)*(loss<loss_)*0.8 + as2_(k)*(loss>loss_);
+        %as1(k) = as1(k)*(loss<loss_)*0.9 + as1_(k)*(loss>loss_);
+        deriv = 2 * (cl_id(a) - cl(a)) * (cl_(a)-cl(a));
+        as2(k) = as2(k) + deriv*0.1;
     end
     
 end
+
 
 else
 loss = mean(cd);
 
 %mkdir (int2str(i))
 for k = 1:length(as1)
-    as1_ = zeros(11,1);
-    as2_ = zeros(11,1);
+    as1_ = zeros(length(as1),1);
+    as2_ = zeros(length(as2),1);
     as1_(k) = as1(k)*1.2;
     perfil_ = update(perfilb,as1_,as2_);
     [ang_, cl_, cd_] = analise(perfil_,k);
     
-    if length(ang_) == a && ang_(a) == ang(a)
-        loss_ = mean(cd_);
-        as1(k) = as1(k)*(loss<loss_)*0.8 + as1_(k)*(loss>loss_);
-    end
+    %if length(ang_) == a && ang_(a) == ang(a)
+    loss_ = mean(cd_);
+    %as1(k) = as1(k)*(loss<loss_)*0.8 + as1_(k)*(loss>loss_);
+    deriv = 2 * loss * (loss_ - loss);
+    as1(k) = as1(k) + deriv*0.1;
+    %end
     
 end
 
-for k = 1:length(as1)
-    as1_ = zeros(11,1);
-    as2_ = zeros(11,1);
+for k = 1:length(as2)
+    as1_ = zeros(length(as1),1);
+    as2_ = zeros(length(as2),1);
     as2_(k) = as1(k)*1.2;
     perfil_ = update(perfilb,as1_,as2_);
     [ang_, cl_, cd_] = analise(perfil_,k);
     
-    if length(ang_) == a && ang_(a) == ang(a)
-        loss_ = mean(cd_);
-        as2(k) = as2(k)*(loss<loss_)*0.8 + as2_(k)*(loss>loss_);
-    end
+    %if length(ang_) >= a && ang_(a) == ang(a)
+    loss_ = mean(cd_);
+    %as2(k) = as2(k)*(loss<loss_)*0.8 + as2_(k)*(loss>loss_);
+    deriv = 2 * loss * (loss_ - loss);
+    as2(k) = as2(k) + deriv*0.1;
+    %end
     
 end
 
@@ -122,6 +141,8 @@ end
 
 end
 
+fclose(fname);
+
 function perfil_ = update(perfil,as1,as2)
 %%calcula o novo perfil
 
@@ -130,11 +151,12 @@ y=perfil(:,2);
 extra = perfil(1:fix(length(perfil)/2),:);
 intra = perfil(fix(length(perfil)/2)+1:length(perfil),:);
 % a's iniciais
-t1s = linspace(0.1,0.9999999,11);
+t1s = linspace(0.1,0.9999999,20);
 t2 = 5;
 %as1 = rand(11,1)/1000;
 %as2 = -rand(11,1)/1000;
-x_ = flip(extra(:,1));
+%x_ = flip(extra(:,1));
+x_ = extra(:,1);
 %figure
 for cnt = 1:length(t1s)
     t1 = t1s(cnt);
@@ -146,7 +168,8 @@ for cnt = 1:length(t1s)
     %hold on
     extra(:,2) = extra(:,2) + y_;
 end
-x_ = flip(intra(:,1));
+%x_ = flip(intra(:,1));
+x_ = (intra(:,1));
 for cnt = 1:length(t1s)
     t1 = t1s(cnt);
     a2 = as2(cnt);
