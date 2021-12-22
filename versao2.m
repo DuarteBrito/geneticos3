@@ -15,14 +15,15 @@ axis([0 1 -0.15 0.15])
 plot (x,y)
 
 ang = [];
-n = 0
-d = 0
-dorso = "teste"
+n = 0;
+d = 0;
+%dorso = "teste";
 while length(ang)~=3
 
 
 as1 = rand(20,1)/1000;  %%
-as2 = -rand(20,1)/1000; %% 
+as2 = rand(20,1)/1000; %% 
+
 
 perfil = update(perfilb,as1,as2);
 x=perfil(:,1);
@@ -43,9 +44,11 @@ for a = 1:4%numero de angulos (4º angulo é o Cd)
 for i = 1:5 %otimizacoes p o mesmo angulo
     
 %i
+as1_copy = as1;
+as2_copy = as2;
 
 
-[ang,cl,cd] = analise(perfil,0,n,d);
+%[ang,cl,cd] = analise(perfil,0,n,d);
 
 
 for j = 1:length(ang)
@@ -58,51 +61,75 @@ if a ~= 4
 %loss = (cl(a)-cl_id(a))^2;
 
 %mkdir (int2str(i))
-for k = 1:length(as1)%extradorso
-    as1_ = zeros(length(as1),1);
-    as2_ = zeros(length(as2),1);
-    as1_(k) = as1(k)*1.2;
-    perfil_ = update(perfilb,as1_,as2_);
-    d = "extra";  %extradorso para a funçao analise
+for k = 1:length(as1)
+    %as1_ = zeros(length(as1),1);
+    %as2_ = zeros(length(as2),1);
+    %as1_ = as1_copy;
+    %as1_(k) = as1_(k)*1.1;
+    as1_ = as1;
+    as1_(max(1,k-3):min(k+3,length(as1_))) = as1_(max(1,k-3):min(k+3,length(as1_)))*1.1;
+    %as1_(k) = as1_(k) + 0.1e-3;
+    perfil_ = update(perfilb,as1_,as2);
+    d = 'extra';
     [ang_, cl_, cd_] = analise(perfil_,k,n,d);
     
     if length(ang_) >= a && ang_(a) == ang(a)
         loss_ = (cl_id(a) - cl_(a))^2;
         %as1(k) = as1(k)*(loss<loss_)*0.9 + as1_(k)*(loss>loss_);
         deriv = 2 * (cl_id(a) - cl(a)) * (cl_(a)-cl(a));
-        as1(k) = as1(k) + deriv*0.1;
+        as1(k) = as1(k) + deriv;
+        %as1(max(1,k-3):min(k+3,length(as1_))) = as1(max(1,k-3):min(k+3,length(as1_))) + deriv*0.4;
     end
+    
+    perfil = update(perfilb,as1,as2);
+    [ang,cl,cd] = analise(perfil,0,n,d);
+    
     
 end
 
-for k = 1:length(as2)%intradorso
-    as1_ = zeros(length(as1),1);
-    as2_ = zeros(length(as2),1);
-    as2_(k) = as2(k)*1.2;
-    perfil_ = update(perfilb,as1_,as2_);
-    d = "intra";   %intradorso para a funçao analise
+
+for k = 1:length(as2)
+    %as1_ = zeros(length(as1),1);
+    %as2_ = zeros(length(as2),1);
+    %as2_ = as2_copy;
+    %as2_(k) = as2_(k)*1.1;
+    as2_ = as2;
+    as2_(max(1,k-3):min(k+3,length(as2_))) = as2_(max(1,k-3):min(k+3,length(as2_)))*1.1;
+    %as2_(k) = as2_(k) + 0.05e-3;
+    perfil_ = update(perfilb,as1,as2_);
+    d = 'intra';
     [ang_, cl_, cd_] = analise(perfil_,k,n,d);
     
     if length(ang_) >= a && ang_(a) == ang(a)
         loss_ = (cl_id(a) - cl_(a))^2;
         %as1(k) = as1(k)*(loss<loss_)*0.9 + as1_(k)*(loss>loss_);
         deriv = 2 * (cl_id(a) - cl(a)) * (cl_(a)-cl(a));
-        as2(k) = as2(k) + deriv*0.1;
+        as2(k) = as2(k) + deriv;
+        %as2(max(1,k-3):min(k+3,length(as2_))) = as2(max(1,k-3):min(k+3,length(as2_))) + deriv*0.4;
     end
     
+    perfil = update(perfilb,as1,as2);
+    [ang,cl,cd] = analise(perfil,0,n,d);
+    
 end
+
+
 
 
 else
 loss = mean(cd);
 
 %mkdir (int2str(i))
-for k = 1:length(as1)%extradorso
-    as1_ = zeros(length(as1),1);
-    as2_ = zeros(length(as2),1);
-    as1_(k) = as1(k)*1.2;
-    perfil_ = update(perfilb,as1_,as2_);
-    d = "extra";  %extradorso para a funçao analise
+for k = 1:length(as1)
+    %as1_ = zeros(length(as1),1);
+    %as2_ = zeros(length(as2),1);
+    %as1_(k) = as1(k)*1.2;
+    %perfil_ = update(perfilb,as1_,as2_);
+    %[ang_, cl_, cd_] = analise(perfil_,k);
+    as1_ = as1_copy;
+    as1_(k) = as1_(k) + 0.05e-3;
+    perfil_ = update(perfilb,as1_,as2_copy);
+    d = 'extra';
     [ang_, cl_, cd_] = analise(perfil_,k,n,d);
     
     %if length(ang_) == a && ang_(a) == ang(a)
@@ -114,13 +141,18 @@ for k = 1:length(as1)%extradorso
     
 end
 
-for k = 1:length(as2)%intradorso
-    as1_ = zeros(length(as1),1);
-    as2_ = zeros(length(as2),1);
-    as2_(k) = as1(k)*1.2;
-    perfil_ = update(perfilb,as1_,as2_);
-    d = "intra";   %intradorso para a funçao analise
+for k = 1:length(as2)
+    %as1_ = zeros(length(as1),1);
+    %as2_ = zeros(length(as2),1);
+    %as2_(k) = as1(k)*1.2;
+    %perfil_ = update(perfilb,as1_,as2_);
+    %[ang_, cl_, cd_] = analise(perfil_,k);
+    as2_ = as2_copy;
+    as2_(k) = as2_(k) + 0.05e-3;
+    perfil_ = update(perfilb,as1_copy,as2_);
+    d = 'intra';
     [ang_, cl_, cd_] = analise(perfil_,k,n,d);
+    
     
     %if length(ang_) >= a && ang_(a) == ang(a)
     loss_ = mean(cd_);
@@ -130,6 +162,7 @@ for k = 1:length(as2)%intradorso
     %end
     
 end
+
 end
 
 perfil = update(perfilb,as1,as2);
@@ -137,10 +170,11 @@ x = perfil(:,1);
 y = perfil(:,2);
 plot (x,y)
 
+d = 'novo';
 %res=analise(perfil)
 [ang,cl,cd] = analise(perfil,0,n,d);
 
-n = n + 1
+n = n + 1;
 
 
 end
@@ -195,7 +229,7 @@ end
 %function resultados = analise(perfil)
 function [ang, cl, cd] = analise(perfil,k,n,d)
     %%faz as analises e diz resultados
-    
+    g = pwd;
     %inputs
     Re = 10e5;
     angles = [1,3,5];
@@ -210,10 +244,11 @@ function [ang, cl, cd] = analise(perfil,k,n,d)
     
         
     
-    curfold = int2str(n) + "pasta" %current folder - nome da pasta atual
+    curfold = int2str(n) + "pasta"; %current folder - nome da pasta atual
     
     if not(isfolder(curfold))
-        mkdir('../geneticos3', [curfold])%cria uma pasta em ../geneticos3 com
+        disp('ok')
+        mkdir(g, [curfold])%cria uma pasta em ../geneticos3 com
         %o nome definido na variável curfold, que depende da iteração do
         %perfil em q o programa se encontra
     end
@@ -224,8 +259,10 @@ function [ang, cl, cd] = analise(perfil,k,n,d)
     %mkdir ../geneticos3 foldname
     
     sname = d + "_" + int2str(k) + "save.txt";% nameDat(1) +  %%% resultados
-    destpath = (['C:\Users\mbv50\OneDrive - Universidade de Lisboa\Faculdade - IST\AeroTéc - OAT\ACC-2022\Programa Genético\Código\git_win\geneticos3\', num2str(curfold)])
+    %destpath = (['C:\Users\mbv50\OneDrive - Universidade de Lisboa\Faculdade - IST\AeroTéc - OAT\ACC-2022\Programa Genético\Código\git_win\geneticos3\', num2str(curfold)])
     %movefile(sname,destpath) - movido p o fim da funcao
+    destpath = g + "\" + curfold;
+    %destpath = ([destpath, num2str(curfold)]);
     
     
     %delete(sname)
