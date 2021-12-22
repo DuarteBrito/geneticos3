@@ -144,7 +144,7 @@ n = n + 1
 
 
 end
-%n = n + 1
+n = n + 1
 end
 
 fclose(fname);
@@ -233,7 +233,7 @@ function [ang, cl, cd] = analise(perfil,k,n,d)
     
     iname = "_input.txt";%nameDat(1) + 
 
-    fname =   d + "_" + int2str(k) + "analise.txt";%ficheiro com o novo perfil $$$$$$$$$$$$$$$
+    fname =   int2str(d) + "_" + int2str(k) + "analise.txt";%ficheiro com o novo perfil $$$$$$$$$$$$$$$
     %movefile(fname,destpath) - movido p o fim da funcao
     pointsX = perfil(:,1);
     pointsY = perfil(:,2);
