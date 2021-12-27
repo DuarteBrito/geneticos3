@@ -21,8 +21,8 @@ d = 0;
 while length(ang)~=3
 
 
-as1 = rand(20,1)/1000;  %%
-as2 = rand(20,1)/1000; %% 
+as1 = rand(20,1)/10;  %%
+as2 = rand(20,1)/10; %% 
 
 
 perfil = update(perfilb,as1,as2);
@@ -37,11 +37,11 @@ end
 
 temp = cl;
 
-cl_id = [0.2 , 0.4 , 0.7];
+cl_id = [0.3652 , 0.8611 , 1];
 %a = 2;
 
 
-for i = 1:10 %otimizacoes p o mesmo angulo
+for i = 1:50 %otimizacoes p o mesmo angulo
 
 %i
 as1_copy = as1;
@@ -50,11 +50,11 @@ as2_copy = as2;
 
 %[ang,cl,cd] = analise(perfil,0,n,d);
 
-
+fprintf(fid, "%d \n", n)
 for j = 1:length(ang)
 fprintf(fid,"%f %f %f \n", ang(j), cl(j), cd(j));
 end
-fprintf("\n\n")
+fprintf(fid, "------------------\n")
 
 
 
@@ -68,7 +68,8 @@ for k = 1:length(as1)
     %as2_ = zeros(length(as2),1);
     as1_ = as1_copy;
     %as1_(k) = as1_(k)*1.1;
-    as1_(max(1,k-3):min(k+3,length(as1_))) = as1_(max(1,k-3):min(k+3,length(as1_)))*1.1;
+    %as1_(max(1,k-3):min(k+3,length(as1_))) = as1_(max(1,k-3):min(k+3,length(as1_)))*1.1;
+    as1_(max(1,k-3):min(k+3,length(as1_))) = as1_(max(1,k-3):min(k+3,length(as1_))) + 0.05;
     %as1_(k) = as1_(k) + 0.1e-3;
     perfil_ = update(perfilb,as1_,as2);
     d = 'extra';
@@ -82,7 +83,7 @@ for k = 1:length(as1)
         loss_ = (cl_id(a) - cl_(a))^2;
         %as1(k) = as1(k)*(loss<loss_)*0.9 + as1_(k)*(loss>loss_);
         deriv_ = 2 * (cl_id(a) - cl(a)) * (cl_(a)-cl(a));
-        deriv = deriv + deriv_;
+        deriv = deriv + deriv_*0.8;
         %as1(max(1,k-3):min(k+3,length(as1_))) = as1(max(1,k-3):min(k+3,length(as1_))) + deriv*0.4;
     end
     
@@ -103,7 +104,8 @@ for k = 1:length(as2)
     as2_ = as2_copy;
     %as2_(k) = as2_(k)*1.1;
     %as2_ = as2;
-    as2_(max(1,k-3):min(k+3,length(as2_))) = as2_(max(1,k-3):min(k+3,length(as2_)))*1.1;
+    %as2_(max(1,k-3):min(k+3,length(as2_))) = as2_(max(1,k-3):min(k+3,length(as2_)))*1.1;
+    as2_(max(1,k-3):min(k+3,length(as2_))) = as2_(max(1,k-3):min(k+3,length(as2_))) + 0.05;
     %as2_(k) = as2_(k) + 0.05e-3;
     perfil_ = update(perfilb,as1,as2_);
     d = 'intra';
@@ -113,7 +115,7 @@ for k = 1:length(as2)
         loss_ = (cl_id(a) - cl_(a))^2;
         %as1(k) = as1(k)*(loss<loss_)*0.9 + as1_(k)*(loss>loss_);
         deriv_ = 2 * (cl_id(a) - cl(a)) * (cl_(a)-cl(a));
-        deriv = deriv + deriv_*0.01;
+        deriv = deriv + deriv_*0.8;
         %as2(max(1,k-3):min(k+3,length(as2_))) = as2(max(1,k-3):min(k+3,length(as2_))) + deriv*0.4;
     end
     
@@ -212,7 +214,7 @@ end
 %n = n + 1
 
 
-fclose(fname);
+%fclose(fname);
 
 function perfil_ = update(perfil,as1,as2)
 %%calcula o novo perfil
@@ -222,8 +224,8 @@ y=perfil(:,2);
 extra = perfil(1:fix(length(perfil)/2),:);
 intra = perfil(fix(length(perfil)/2)+1:length(perfil),:);
 % a's iniciais
-t1s = linspace(0.1,0.9999999,20);
-t2 = 5;
+t1s = linspace(0.1,0.9999999,length(as1));
+t2 = 2;
 %as1 = rand(11,1)/1000;
 %as2 = -rand(11,1)/1000;
 %x_ = flip(extra(:,1));
@@ -234,7 +236,7 @@ for cnt = 1:length(t1s)
     a1 = as1(cnt);
     %x_ = flip(extra(:,1));
     %y_ = x_;
-    y_ = a1 * sin(pi*x_.^(log(0.5)/log(t1))).^t2;
+    y_ = a1 * 0.01* sin(pi*x_.^(log(0.5)/log(t1))).^t2;
     %plot(x_,y_)
     %hold on
     extra(:,2) = extra(:,2) + y_;
@@ -246,7 +248,7 @@ for cnt = 1:length(t1s)
     a2 = as2(cnt);
     %x_ = flip(extra(:,1));
     %y_ = x_;
-    y_ = a2 * sin(pi*x_.^(log(0.5)/log(t1))).^t2;
+    y_ = a2 * 0.02* sin(pi*x_.^(log(0.5)/log(t1))).^t2;
     %plot(x_,y_)
     %hold on
     intra(:,2) = intra(:,2) + y_;
@@ -263,7 +265,7 @@ function [ang, cl, cd] = analise(perfil,k,n,d,a)
     g = pwd;
     %inputs
     Re = 10e5;
-    angles = [1,3,5];
+    angles = [1,8,10];
     
     %if d == 1
     %    dorso = "extra"
