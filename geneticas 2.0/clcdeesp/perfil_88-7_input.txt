@@ -1,0 +1,24 @@
+PLOP
+G
+
+load createdAirfoils/perfil_88-7.txt
+
+
+PPAR
+N 200 
+
+
+OPER
+Visc
+400000
+ITER 200
+PACC
+createdAirfoils/perfil_88-7save.txt 
+
+Alfa 0.0 
+Alfa 3.0 
+Alfa 6.0 
+Alfa 8.0 
+PACC
+
+

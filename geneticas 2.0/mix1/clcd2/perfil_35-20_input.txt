@@ -1,0 +1,24 @@
+PLOP
+G
+
+load createdAirfoils/perfil_35-20.txt
+
+
+PPAR
+N 200 
+
+
+OPER
+Visc
+400000
+ITER 200
+PACC
+createdAirfoils/perfil_35-20save.txt 
+
+Alfa 0.0 
+Alfa 2.0 
+Alfa 4.0 
+Alfa 5.0 
+PACC
+
+
