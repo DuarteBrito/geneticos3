@@ -340,9 +340,9 @@ function [ang, cl, cd] = analise(perfil,k,n,d,a)
     %%faz as analises e diz resultados
     g = pwd;
     %inputs
-    Re = 10e5;
+    Re = 3.5e5;
     angles = [1,8,10];
-    cls = [0.3652 ; 0.8611];
+    cls = [0.2665 ; 0.5750];
     %if d == 1
     %    dorso = "extra"
     %elseif d == 2
@@ -431,7 +431,7 @@ function [ang, cl, cd] = analise(perfil,k,n,d,a)
         %fprintf(fid,"Alfa %1.1f \n", 10);
         fprintf(fid,"Cl %1.4f \n", cls(i));
     end
-    fprintf(fid,"Alfa %1.1f \n", 10);
+    fprintf(fid,"Alfa %1.1f \n", 12);
     
 %     if config(7+config(21))~=0
 %         fprintf(fid,"Alfa %1.1f \n", config(6+config(21)));
